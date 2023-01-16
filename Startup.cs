@@ -1,4 +1,6 @@
-﻿namespace AutoresAPI{
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace AutoresAPI{
     public class Startup {
         public Startup(IConfiguration configuration) {
             Configuration = configuration;
@@ -10,6 +12,10 @@
             // Add services to the container.
 
             services.AddControllers();
+            services.AddDbContext<ApplicationDbContext>(options => 
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")
+            ));
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
