@@ -12,9 +12,30 @@ namespace AutoresAPI.Controllers {
             this.context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<Autor>>> Get() {
+        [HttpGet("listado")]
+        public async Task<ActionResult<List<Autor>>> GetAutores() {
             return await context.Autores.Include(x => x.Libros).ToListAsync();
+        }
+
+        [HttpGet("listadoSincrona")]
+        public List<Autor> GetAutoresSincrona() {
+            return context.Autores.Include(x => x.Libros).ToList();
+        }
+
+        [HttpGet("primerAutor")]
+        public async Task<ActionResult<Autor>> primerAutor() {
+            return await context.Autores.FirstOrDefaultAsync();
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Autor>> Get(int id) { 
+            var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
+            
+            if(autor is null) {
+                return NotFound();
+            }
+
+            return autor;
         }
 
         [HttpPost]
