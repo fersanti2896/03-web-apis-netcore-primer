@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoresAPI.Servicios;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 namespace AutoresAPI{
@@ -18,6 +19,12 @@ namespace AutoresAPI{
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")
             ));
+
+            services.AddTransient<IService, ServiceA>();
+
+            services.AddTransient<ServiceTransient>();
+            services.AddScoped<ServiceScoped>();
+            services.AddSingleton<ServiceSingleton>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();

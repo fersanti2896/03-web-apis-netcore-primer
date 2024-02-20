@@ -1,4 +1,5 @@
 ﻿using AutoresAPI.Entities;
+using AutoresAPI.Servicios;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,9 +8,35 @@ namespace AutoresAPI.Controllers {
     [Route("api/autores")]
     public class AutoresController : ControllerBase {
         private readonly ApplicationDbContext context;
+        private readonly IService service;
+        private readonly ServiceTransient serviceTransient;
+        private readonly ServiceScoped serviceScoped;
+        private readonly ServiceSingleton serviceSingleton;
 
-        public AutoresController(ApplicationDbContext context) {
+        public AutoresController(
+            ApplicationDbContext context,
+            IService service,
+            ServiceTransient serviceTransient,
+            ServiceScoped serviceScoped,
+            ServiceSingleton serviceSingleton 
+        ) {
             this.context = context;
+            this.service = service;
+            this.serviceTransient = serviceTransient;
+            this.serviceScoped = serviceScoped;
+            this.serviceSingleton = serviceSingleton;
+        }
+
+        [HttpGet("guid")]
+        public ActionResult obtenerGuids() { 
+            return Ok(new { 
+                AutoresController_Transient = serviceTransient.guid,
+                AutoresController_Scoped = serviceScoped.guid,
+                AutoresController_Singleton = serviceSingleton.guid,
+                ServicioA_Transient = service.obtenerTransient(),
+                ServiceA_Scoped = service.obtenerScoped(),
+                ServiceA_Singleton = service.obtenerSingleton()
+            }); 
         }
 
         [HttpGet("listado")]
