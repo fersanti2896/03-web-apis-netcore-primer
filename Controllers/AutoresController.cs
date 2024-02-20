@@ -12,19 +12,22 @@ namespace AutoresAPI.Controllers {
         private readonly ServiceTransient serviceTransient;
         private readonly ServiceScoped serviceScoped;
         private readonly ServiceSingleton serviceSingleton;
+        private readonly ILogger<AutoresController> logger;
 
         public AutoresController(
             ApplicationDbContext context,
             IService service,
             ServiceTransient serviceTransient,
             ServiceScoped serviceScoped,
-            ServiceSingleton serviceSingleton 
+            ServiceSingleton serviceSingleton,
+            ILogger<AutoresController> logger
         ) {
             this.context = context;
             this.service = service;
             this.serviceTransient = serviceTransient;
             this.serviceScoped = serviceScoped;
             this.serviceSingleton = serviceSingleton;
+            this.logger = logger;
         }
 
         [HttpGet("guid")]
@@ -41,6 +44,7 @@ namespace AutoresAPI.Controllers {
 
         [HttpGet("listado")]
         public async Task<ActionResult<List<Autor>>> GetAutores() {
+            logger.LogInformation("Estamos obteniendo información de Autores");
             return await context.Autores.Include(x => x.Libros).ToListAsync();
         }
 
