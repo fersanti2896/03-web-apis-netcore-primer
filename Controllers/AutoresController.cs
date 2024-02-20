@@ -38,8 +38,14 @@ namespace AutoresAPI.Controllers {
             return autor;
         }
 
-        [HttpPost]
-        public async Task<ActionResult> Post(Autor autor) {
+        [HttpPost("createAutor")]
+        public async Task<ActionResult> Post([FromBody] Autor autor) {
+            var existsName = await context.Autores.AnyAsync(x => x.Nombre == autor.Nombre);
+            
+            if(existsName) {
+                return BadRequest($"Ya existe un autor con el mismo nombre {autor.Nombre}");
+            }
+
             context.Add(autor);
             await context.SaveChangesAsync();  
 
