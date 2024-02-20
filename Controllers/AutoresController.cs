@@ -1,5 +1,7 @@
 ﻿using AutoresAPI.Entities;
+using AutoresAPI.Filtros;
 using AutoresAPI.Servicios;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,6 +33,8 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("guid")]
+        //[ResponseCache(Duration = 10)]
+        [ServiceFilter(typeof(FilterAction))]
         public ActionResult obtenerGuids() { 
             return Ok(new { 
                 AutoresController_Transient = serviceTransient.guid,
@@ -43,6 +47,8 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("listado")]
+        [ServiceFilter(typeof(FilterAction))]
+        //[Authorize]
         public async Task<ActionResult<List<Autor>>> GetAutores() {
             logger.LogInformation("Estamos obteniendo información de Autores");
             return await context.Autores.Include(x => x.Libros).ToListAsync();
