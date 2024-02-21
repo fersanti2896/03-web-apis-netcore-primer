@@ -21,7 +21,8 @@ namespace AutoresAPI.Controllers {
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<LibroDTO>> Get(int id) {
-            var libros = await context.Libros.FirstOrDefaultAsync(x => x.Id == id);
+            var libros = await context.Libros.Include(x => x.Comentarios)
+                                             .FirstOrDefaultAsync(x => x.Id == id);
 
             return mapper.Map<LibroDTO>(libros);
         }
