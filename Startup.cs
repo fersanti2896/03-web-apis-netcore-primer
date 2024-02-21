@@ -1,6 +1,5 @@
 ﻿using AutoresAPI.Filtros;
 using AutoresAPI.Middlewares;
-using AutoresAPI.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -24,12 +23,6 @@ namespace AutoresAPI{
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")
             ));
-
-            services.AddTransient<IService, ServiceA>();
-
-            services.AddTransient<ServiceTransient>();
-            services.AddScoped<ServiceScoped>();
-            services.AddSingleton<ServiceSingleton>();
 
             services.AddTransient<FilterAction>();
 
@@ -59,7 +52,6 @@ namespace AutoresAPI{
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseResponseCaching();
             app.UseAuthorization();
 
             app.UseEndpoints(end => {
