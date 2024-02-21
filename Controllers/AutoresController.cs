@@ -23,7 +23,7 @@ namespace AutoresAPI.Controllers {
 
         [HttpGet("listado")]
         public async Task<ActionResult<List<AutorDTO>>> GetAutores() {
-            var autores = await context.Autores.Include(x => x.Libros).ToListAsync();
+            var autores = await context.Autores.ToListAsync();
 
             return mapper.Map<List<AutorDTO>>(autores);
         }
