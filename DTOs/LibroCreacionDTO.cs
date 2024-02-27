@@ -7,5 +7,6 @@ namespace AutoresAPI.DTOs {
         [Required(ErrorMessage = "El campo {0} es requerido.")]
         [ValidacionAttribute]
         public string Titulo { get; set; }
-     }
+        public List<int> AutoresIds { get; set; }
+    }
 }

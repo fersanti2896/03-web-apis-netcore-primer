@@ -29,14 +29,17 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<AutorDTO>> Get(int id) { 
-            var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
+        public async Task<ActionResult<AutorDTOLibros>> Get(int id) { 
+            var autor = await context.Autores
+                                     .Include(a => a.AutoresLibros)
+                                     .ThenInclude(al => al.Libro)
+                                     .FirstOrDefaultAsync(x => x.Id == id);
             
             if(autor is null) {
                 return NotFound();
             }
 
-            return mapper.Map<AutorDTO>(autor);
+            return mapper.Map<AutorDTOLibros>(autor);
         }
 
         [HttpPost("crear")]
