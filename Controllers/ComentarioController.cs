@@ -19,18 +19,16 @@ namespace AutoresAPI.Controllers {
             this.mapper = mapper;
         }
 
-        [HttpGet("listado")]
-        public async Task<ActionResult<List<ComentarioDTO>>> Comentarios(int libroId) {
-            var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
+        [HttpGet("{id:int}", Name = "ObtenerComentario")]
+        public async Task<ActionResult<ComentarioDTO>> ComentarioById(int id) {
+            var comentario = await context.Comentarios.FirstOrDefaultAsync(c => c.Id == id);
 
-            if (!existeLibro) return NotFound();
+            if(comentario == null) return NotFound();
 
-            var comentarios = await context.Comentarios.Where(x => x.LibroId == libroId).ToListAsync();
-
-            return mapper.Map<List<ComentarioDTO>>(comentarios);
+            return mapper.Map<ComentarioDTO>(comentario);
         }
 
-        [HttpPost]
+        [HttpPost("crear")]
         public async Task<ActionResult> CrearComentario(int libroId, ComentarioCreacionDTO comentarioCreacionDTO) {
             var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
 
@@ -42,7 +40,29 @@ namespace AutoresAPI.Controllers {
             context.Add(comentario);
             await context.SaveChangesAsync();
 
-            return Ok();
+            var comentarioDTO = mapper.Map<ComentarioDTO>(comentario);
+
+            return CreatedAtRoute("ObtenerComentario", new { id = comentario.Id, libroId = libroId }, comentarioDTO);
+        }
+
+        [HttpPut("actualizar/{comId:int}")]
+        public async Task<ActionResult> ActComentario(int libroId, int comId, ComentarioCreacionDTO comentarioDTO) {
+            var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
+
+            if (!existeLibro) return NotFound();
+
+            var existeCom = await context.Comentarios.AnyAsync(c => c.Id == comId);
+
+            if(!existeCom) return NotFound();
+
+            var comentario = mapper.Map<Comentario>(comentarioDTO);
+            comentario.Id = comId;
+            comentario.LibroId = libroId;
+
+            context.Update(comentario);
+            await context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

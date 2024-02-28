@@ -22,13 +22,16 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("listado")]
-        public async Task<ActionResult<List<AutorDTO>>> GetAutores() {
-            var autores = await context.Autores.ToListAsync();
+        public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores() {
+            var autores = await context.Autores
+                                       .Include(a => a.AutoresLibros)
+                                       .ThenInclude(al => al.Libro)
+                                       .ToListAsync();
 
-            return mapper.Map<List<AutorDTO>>(autores);
+            return mapper.Map<List<AutorDTOLibros>>(autores);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "obtenerAutor")]
         public async Task<ActionResult<AutorDTOLibros>> Get(int id) { 
             var autor = await context.Autores
                                      .Include(a => a.AutoresLibros)
@@ -43,37 +46,38 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpPost("crear")]
-        public async Task<ActionResult> Post([FromBody] AutorCreacionDTO autorDTO) {
-            var existsName = await context.Autores.AnyAsync(x => x.Nombre == autorDTO.Nombre);
+        public async Task<ActionResult> Post([FromBody] AutorCreacionDTO autorCreacionDTO) {
+            var existsName = await context.Autores.AnyAsync(x => x.Nombre == autorCreacionDTO.Nombre);
             
             if(existsName) {
-                return BadRequest($"Ya existe un autor con el mismo nombre {autorDTO.Nombre}");
+                return BadRequest($"Ya existe un autor con el mismo nombre {autorCreacionDTO.Nombre}");
             }
 
-            var autor = mapper.Map<Autor>(autorDTO);
+            var autor = mapper.Map<Autor>(autorCreacionDTO);
 
             context.Add(autor);
-            await context.SaveChangesAsync();  
+            await context.SaveChangesAsync();
 
-            return Ok();
+            var autorDTO = mapper.Map<AutorDTOLibros>(autor);
+
+            return CreatedAtRoute("obtenerAutor", new { id = autor.Id }, autorDTO);
         }
 
         [HttpPut("actualizar/{id:int}")]
-        public async Task<ActionResult> Put(Autor autor, int id) {
-            if (autor.Id != id) { 
-                return BadRequest("El id del autor no coincide con el id de la URL");
-            }
-
+        public async Task<ActionResult> Put(AutorCreacionDTO autorDTO, int id) {
             var existe = await context.Autores.AnyAsync(x => x.Id == id);
 
             if (!existe) {
                 return NotFound();
             }
 
-            context.Update(autor);
-            await context.SaveChangesAsync();
+            var autor = mapper.Map<Autor>(autorDTO);
+            autor.Id = id;  
 
-            return Ok();
+            context.Update(autor);
+            await context.SaveChangesAsync();            
+
+            return NoContent();
         }
 
         [HttpDelete("eliminar/{id:int}")]
