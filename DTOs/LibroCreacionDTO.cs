@@ -8,5 +8,6 @@ namespace AutoresAPI.DTOs {
         [ValidacionAttribute]
         public string Titulo { get; set; }
         public List<int> AutoresIds { get; set; }
+        public DateTime FechaPublicacion { get; set; }
     }
 }

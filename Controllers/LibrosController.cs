@@ -86,6 +86,18 @@ namespace AutoresAPI.Controllers {
             return NoContent();
         }
 
+        [HttpDelete("eliminar/{id:int}")]
+        public async Task<ActionResult> EliminarLibro(int id) {
+            var existe = await context.Libros.AnyAsync(x => x.Id == id);
+
+            if (!existe) return NotFound();
+
+            context.Remove(new Libro() { Id = id });
+            await context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         private void AsignarAutores(Libro libro) { 
             if (libro.AutoresLibros != null) {
                 for (int i = 0; i < libro.AutoresLibros.Count; i++) {
