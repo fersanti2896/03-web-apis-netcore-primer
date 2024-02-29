@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using AutoresAPI.DTOs;
 using AutoresAPI.Entities;
-using AutoresAPI.Filtros;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,13 +10,16 @@ namespace AutoresAPI.Controllers {
     public class AutoresController : ControllerBase {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
 
         public AutoresController(
             ApplicationDbContext context,
-            IMapper mapper
+            IMapper mapper,
+            IConfiguration configuration
         ) {
             this.context = context;
             this.mapper = mapper;
+            this.configuration = configuration;
         }
 
         [HttpGet("listado")]
@@ -92,6 +93,11 @@ namespace AutoresAPI.Controllers {
             await context.SaveChangesAsync();
 
             return Ok();
+        }
+
+        [HttpGet("configuraciones")]
+        public ActionResult<string> obtConfiguracion() {
+            return configuration["llave"];
         }
     }
 }
