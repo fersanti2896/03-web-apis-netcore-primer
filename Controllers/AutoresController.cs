@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using AutoresAPI.DTOs;
 using AutoresAPI.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +25,7 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("listado")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores() {
             var autores = await context.Autores
                                        .Include(a => a.AutoresLibros)
@@ -93,11 +96,6 @@ namespace AutoresAPI.Controllers {
             await context.SaveChangesAsync();
 
             return Ok();
-        }
-
-        [HttpGet("configuraciones")]
-        public ActionResult<string> obtConfiguracion() {
-            return configuration["llave"];
         }
     }
 }
