@@ -81,6 +81,13 @@ namespace AutoresAPI{
             services.AddAuthorization(opc => {
                 opc.AddPolicy("isAdmin", pol => pol.RequireClaim("isAdmin"));
             });
+
+            // CORS
+            services.AddCors(opc => { 
+                opc.AddDefaultPolicy(p => {
+                    p.WithOrigins("").AllowAnyMethod().AllowAnyHeader();
+                });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger) {
@@ -101,6 +108,7 @@ namespace AutoresAPI{
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseCors();
             app.UseAuthorization();
 
             app.UseEndpoints(end => {
