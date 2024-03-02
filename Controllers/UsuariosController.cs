@@ -1,6 +1,7 @@
 ﻿using AutoresAPI.DTOs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -16,15 +17,18 @@ namespace AutoresAPI.Controllers {
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<IdentityUser> signInManager;
+        private readonly IDataProtector dataProtector;
 
         public UsuariosController(
             UserManager<IdentityUser> userManager,
             IConfiguration configuration,
-            SignInManager<IdentityUser> signInManager
+            SignInManager<IdentityUser> signInManager,
+            IDataProtectionProvider dataProtectionProvider
         ) {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
+            dataProtector = dataProtectionProvider.CreateProtector("fersa2896");
         }
 
         [HttpPost("registrar")]
@@ -94,5 +98,36 @@ namespace AutoresAPI.Controllers {
 
             return new Autenticacion() { Token = new JwtSecurityTokenHandler().WriteToken(securityToken), Expiracion = exp };
         }
+
+        #region Encriptacion - Ejemplos
+        
+        [HttpGet("encriptar")]
+        public ActionResult encriptacion() {
+            var txtPlano = "Fernando Santiago";
+            var txtCifrado = dataProtector.Protect(txtPlano);
+            var txtDesc = dataProtector.Unprotect(txtCifrado);
+
+            return Ok(new { 
+                txtPlano = txtPlano,
+                txtCifrado = txtCifrado,
+                txtDesc = txtDesc
+            });
+        }
+
+        [HttpGet("encriptarTiempo")]
+        public ActionResult encriptacionTiempo() {
+            var porTiempo = dataProtector.ToTimeLimitedDataProtector();
+
+            var txtPlano = "Fernando Santiago";
+            var txtCifrado = porTiempo.Protect(txtPlano, lifetime: TimeSpan.FromSeconds(5));
+            var txtDesc = porTiempo.Unprotect(txtCifrado);
+
+            return Ok(new { 
+                txtPlano = txtPlano,
+                txtCifrado = txtCifrado,
+                txtDesc = txtDesc
+            });
+        }
+        #endregion
     }
 }

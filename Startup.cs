@@ -82,6 +82,8 @@ namespace AutoresAPI{
                 opc.AddPolicy("isAdmin", pol => pol.RequireClaim("isAdmin"));
             });
 
+            services.AddDataProtection();
+
             // CORS
             services.AddCors(opc => { 
                 opc.AddDefaultPolicy(p => {
