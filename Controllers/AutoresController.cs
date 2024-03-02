@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoresAPI.Controllers {
     [ApiController]
     [Route("api/autores")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
     public class AutoresController : ControllerBase {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
@@ -25,7 +26,6 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("listado")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores() {
             var autores = await context.Autores
                                        .Include(a => a.AutoresLibros)
@@ -36,6 +36,7 @@ namespace AutoresAPI.Controllers {
         }
 
         [HttpGet("{id:int}", Name = "obtenerAutor")]
+        [AllowAnonymous]
         public async Task<ActionResult<AutorDTOLibros>> Get(int id) { 
             var autor = await context.Autores
                                      .Include(a => a.AutoresLibros)

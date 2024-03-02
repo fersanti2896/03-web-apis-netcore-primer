@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
 
 namespace AutoresAPI{
     public class Startup {
         public Startup(IConfiguration configuration) {
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             Configuration = configuration;
         }
 
@@ -74,6 +76,11 @@ namespace AutoresAPI{
 
             // Configurando Identity
             services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+
+            // Autorizacion por Claims
+            services.AddAuthorization(opc => {
+                opc.AddPolicy("isAdmin", pol => pol.RequireClaim("isAdmin"));
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger) {

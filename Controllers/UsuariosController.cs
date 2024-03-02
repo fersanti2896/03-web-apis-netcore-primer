@@ -1,8 +1,11 @@
 ﻿using AutoresAPI.DTOs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -30,7 +33,7 @@ namespace AutoresAPI.Controllers {
             var result = await userManager.CreateAsync(user, usuario.Password);
 
             if (result.Succeeded) { 
-                return construirToken(usuario);
+                return await construirToken(usuario);
             } else {
                 return BadRequest(result.Errors);
             }
@@ -41,20 +44,51 @@ namespace AutoresAPI.Controllers {
             var result = await signInManager.PasswordSignInAsync(usuario.Email, usuario.Password, isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded) {
-                return construirToken(usuario);
+                return await construirToken(usuario);
             } else {
                 return BadRequest("Login incorrecto.");
             }
         }
 
-        private Autenticacion construirToken(Usuario usuario) {
+        [HttpGet("renovarToken")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult<Autenticacion>> RenovarToken() {
+            var emailClaim = HttpContext.User.Claims.Where(c => c.Type == "email").FirstOrDefault();
+            var email = emailClaim.Value;
+
+            var usuario = new Usuario { Email = email };
+
+            return await construirToken(usuario);
+        }
+
+        [HttpPost("asignarRol")]
+        public async Task<ActionResult> asignarRol(RolDTO rolDTO) { 
+            var usuario = await userManager.FindByEmailAsync(rolDTO.Email);
+            await userManager.AddClaimAsync(usuario, new Claim("isAdmin", "1"));
+
+            return NoContent();
+        }
+
+        [HttpPost("removerRol")]
+        public async Task<ActionResult> removerRol(RolDTO rolDTO) {
+            var usuario = await userManager.FindByEmailAsync(rolDTO.Email);
+            await userManager.RemoveClaimAsync(usuario, new Claim("isAdmin", "1"));
+
+            return NoContent();
+        }
+
+        private async Task<Autenticacion> construirToken(Usuario usuario) {
             var claims = new List<Claim>() {
                 new Claim("email", usuario.Email)
             };
 
+            var user = await userManager.FindByEmailAsync(usuario.Email);
+            var claimDB = await userManager.GetClaimsAsync(user);
+            claims.AddRange(claimDB);
+
             var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwt"]));
             var creds = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
-            var exp = DateTime.UtcNow.AddYears(1);
+            var exp = DateTime.UtcNow.AddMinutes(30);
 
             var securityToken = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: exp, signingCredentials: creds);
 
