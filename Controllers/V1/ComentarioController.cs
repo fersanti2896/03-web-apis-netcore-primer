@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoresAPI.Controllers {
+namespace AutoresAPI.Controllers.V1 {
     [ApiController]
-    [Route("api/libros/{libroId:int}/comentarios")]
+    [Route("api/v1/libros/{libroId:int}/comentarios")]
     public class ComentarioController : ControllerBase {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;

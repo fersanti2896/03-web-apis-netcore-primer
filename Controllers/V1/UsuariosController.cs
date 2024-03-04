@@ -10,9 +10,9 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 
-namespace AutoresAPI.Controllers {
+namespace AutoresAPI.Controllers.V1 {
     [ApiController]
-    [Route("api/usuarios")]
+    [Route("api/v1/usuarios")]
     public class UsuariosController : ControllerBase {
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;

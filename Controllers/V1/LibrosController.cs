@@ -4,9 +4,9 @@ using AutoresAPI.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoresAPI.Controllers {
+namespace AutoresAPI.Controllers.V1 {
     [ApiController]
-    [Route("api/libros")]
+    [Route("api/v1/libros")]
     public class LibrosController : ControllerBase {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;

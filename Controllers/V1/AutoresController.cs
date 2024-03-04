@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoresAPI.Controllers {
+namespace AutoresAPI.Controllers.V1 {
     [ApiController]
-    [Route("api/autores")]
+    [Route("api/v1/autores")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
     public class AutoresController : ControllerBase {
         private readonly ApplicationDbContext context;
@@ -25,6 +25,10 @@ namespace AutoresAPI.Controllers {
             this.configuration = configuration;
         }
 
+        /// <summary>
+        /// Listado de Autores
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("listado", Name = "ObtenerAutores")]
         public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores() {
             var autores = await context.Autores
@@ -35,8 +39,15 @@ namespace AutoresAPI.Controllers {
             return mapper.Map<List<AutorDTOLibros>>(autores);
         }
 
+        /// <summary>
+        /// Obtiene un Autor por su Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id:int}", Name = "ObtieneAutor")]
         [AllowAnonymous]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(200)]
         public async Task<ActionResult<AutorDTOLibros>> Get(int id) { 
             var autor = await context.Autores
                                      .Include(a => a.AutoresLibros)

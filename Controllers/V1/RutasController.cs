@@ -1,9 +1,9 @@
 ﻿using AutoresAPI.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoresAPI.Controllers {
+namespace AutoresAPI.Controllers.V1 {
     [ApiController]
-    [Route("api")]
+    [Route("api/v1")]
     public class RutasController : ControllerBase {
         [HttpGet(Name = "ObtenerRoot")]
         public ActionResult<IEnumerable<DatoHATEOAS>> obtenerRoot() {
