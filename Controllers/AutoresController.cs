@@ -25,7 +25,7 @@ namespace AutoresAPI.Controllers {
             this.configuration = configuration;
         }
 
-        [HttpGet("listado")]
+        [HttpGet("listado", Name = "ObtenerAutores")]
         public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores() {
             var autores = await context.Autores
                                        .Include(a => a.AutoresLibros)
@@ -35,7 +35,7 @@ namespace AutoresAPI.Controllers {
             return mapper.Map<List<AutorDTOLibros>>(autores);
         }
 
-        [HttpGet("{id:int}", Name = "obtenerAutor")]
+        [HttpGet("{id:int}", Name = "ObtieneAutor")]
         [AllowAnonymous]
         public async Task<ActionResult<AutorDTOLibros>> Get(int id) { 
             var autor = await context.Autores
@@ -50,7 +50,7 @@ namespace AutoresAPI.Controllers {
             return mapper.Map<AutorDTOLibros>(autor);
         }
 
-        [HttpPost("crear")]
+        [HttpPost("crear", Name = "CrearAutor")]
         public async Task<ActionResult> Post([FromBody] AutorCreacionDTO autorCreacionDTO) {
             var existsName = await context.Autores.AnyAsync(x => x.Nombre == autorCreacionDTO.Nombre);
             
@@ -65,10 +65,10 @@ namespace AutoresAPI.Controllers {
 
             var autorDTO = mapper.Map<AutorDTOLibros>(autor);
 
-            return CreatedAtRoute("obtenerAutor", new { id = autor.Id }, autorDTO);
+            return CreatedAtRoute("ObtieneAutor", new { id = autor.Id }, autorDTO);
         }
 
-        [HttpPut("actualizar/{id:int}")]
+        [HttpPut("actualizar/{id:int}", Name = "ActualizarAutor")]
         public async Task<ActionResult> Put(AutorCreacionDTO autorDTO, int id) {
             var existe = await context.Autores.AnyAsync(x => x.Id == id);
 
