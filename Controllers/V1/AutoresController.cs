@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoresAPI.DTOs;
 using AutoresAPI.Entities;
+using AutoresAPI.Utilidades;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,11 +31,17 @@ namespace AutoresAPI.Controllers.V1 {
         /// </summary>
         /// <returns></returns>
         [HttpGet("listado", Name = "ObtenerAutores")]
-        public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores() {
-            var autores = await context.Autores
-                                       .Include(a => a.AutoresLibros)
-                                       .ThenInclude(al => al.Libro)
-                                       .ToListAsync();
+        public async Task<ActionResult<List<AutorDTOLibros>>> GetAutores([FromQuery] PaginacionDTO paginacionDTO) {
+            var query = context.Autores
+                               .Include(a => a.AutoresLibros)
+                               .ThenInclude(al => al.Libro)
+                               .AsQueryable();
+
+            await HttpContext.paginacionCabecera(query);
+
+            var autores = await query.OrderBy(a => a.Nombre)
+                                     .Paginar(paginacionDTO)
+                                     .ToListAsync();
 
             return mapper.Map<List<AutorDTOLibros>>(autores);
         }
