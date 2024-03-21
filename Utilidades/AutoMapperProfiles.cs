@@ -15,6 +15,7 @@ namespace AutoresAPI.Utilidades {
             CreateMap<Libro, LibroDTOAutores>().ForMember(l => l.Autores, opc => opc.MapFrom(MapLibroDTOAutores));
             CreateMap<ComentarioCreacionDTO, Comentario>();
             CreateMap<Comentario, ComentarioDTO>();
+            CreateMap<LlaveAPI, LlaveDTO>();
          
         }
 

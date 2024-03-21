@@ -8,8 +8,8 @@ namespace AutoresAPI.Servicios {
             this.context = context;
         }
 
-        public async Task CrearLlave(string usuarioId, TipoLlave tipoLlave) { 
-            var llave = Guid.NewGuid().ToString().Replace("-", "");
+        public async Task CrearLlave(string usuarioId, TipoLlave tipoLlave) {
+            var llave = generarLlave();
 
             var llaveAPI = new LlaveAPI { 
                 Activa = true, 
@@ -20,6 +20,12 @@ namespace AutoresAPI.Servicios {
 
             context.Add(llaveAPI);
             await context.SaveChangesAsync();
+        }
+
+        public string generarLlave() { 
+            var llave = Guid.NewGuid().ToString().Replace("-", "");
+
+            return llave;
         }
     }
 }
