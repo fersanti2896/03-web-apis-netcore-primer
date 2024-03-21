@@ -1,11 +1,13 @@
 ﻿using AutoresAPI.Filtros;
 using AutoresAPI.Middlewares;
+using AutoresAPI.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -47,6 +49,8 @@ namespace AutoresAPI{
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AutoresSuscripciones API", Version = "v1", Description = "Web API de Autores con servicio de Suscripciones", Contact = new OpenApiContact { Email = "fersanti2896@gmail.com" } });
+
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -70,6 +74,10 @@ namespace AutoresAPI{
                         new string[]{}
                     }
                 });
+
+                var fileXML = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var routeXML = Path.Combine(AppContext.BaseDirectory, fileXML);
+                c.IncludeXmlComments(routeXML);
             });
 
             services.AddAutoMapper(typeof(Startup));
@@ -87,9 +95,11 @@ namespace AutoresAPI{
             // CORS
             services.AddCors(opc => { 
                 opc.AddDefaultPolicy(p => {
-                    p.WithOrigins("").AllowAnyMethod().AllowAnyHeader();
+                    p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
+            services.AddScoped<LlavesService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger) {

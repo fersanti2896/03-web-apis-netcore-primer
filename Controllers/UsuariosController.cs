@@ -1,12 +1,12 @@
 ﻿using AutoresAPI.DTOs;
+using AutoresAPI.Entities;
+using AutoresAPI.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -17,54 +17,79 @@ namespace AutoresAPI.Controllers {
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<IdentityUser> signInManager;
-        private readonly IDataProtector dataProtector;
+        private readonly LlavesService serviceLlaves;
 
         public UsuariosController(
             UserManager<IdentityUser> userManager,
             IConfiguration configuration,
             SignInManager<IdentityUser> signInManager,
-            IDataProtectionProvider dataProtectionProvider
+            LlavesService serviceLlaves
         ) {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
-            dataProtector = dataProtectionProvider.CreateProtector("fersa2896");
+            this.serviceLlaves = serviceLlaves;
         }
 
+        /// <summary>
+        /// Registra un usuario en nuestra API
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <returns></returns>
         [HttpPost("registrar")]
         public async Task<ActionResult<Autenticacion>> registrar(Usuario usuario) {
             var user = new IdentityUser { UserName = usuario.Email, Email = usuario.Email };
             var result = await userManager.CreateAsync(user, usuario.Password);
 
-            if (result.Succeeded) { 
-                return await construirToken(usuario);
+            if (result.Succeeded) {
+                await serviceLlaves.CrearLlave(user.Id, TipoLlave.Gratuita);
+
+                return await construirToken(usuario, user.Id);
             } else {
                 return BadRequest(result.Errors);
             }
         }
 
+        /// <summary>
+        /// Acceso a un usuario a nuestra API
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<ActionResult<Autenticacion>> login(Usuario usuario) {
             var result = await signInManager.PasswordSignInAsync(usuario.Email, usuario.Password, isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded) {
-                return await construirToken(usuario);
+                var user = await userManager.FindByEmailAsync(usuario.Email);
+
+                return await construirToken(usuario, user.Id);
             } else {
                 return BadRequest("Login incorrecto.");
             }
         }
 
+        /// <summary>
+        /// Renueva token del usuario para nuestra API. 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("renovarToken")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<Autenticacion>> RenovarToken() {
             var emailClaim = HttpContext.User.Claims.Where(c => c.Type == "email").FirstOrDefault();
             var email = emailClaim.Value;
+            var idClaim = HttpContext.User.Claims.Where(c => c.Type == "id").FirstOrDefault();
+            var usuarioId = idClaim.Value;
 
             var usuario = new Usuario { Email = email };
 
-            return await construirToken(usuario);
+            return await construirToken(usuario, usuarioId);
         }
 
+        /// <summary>
+        /// Asigna rol a un usuario para acceso a ciertos endpoints en nuestra API.
+        /// </summary>
+        /// <param name="rolDTO"></param>
+        /// <returns></returns>
         [HttpPost("asignarRol")]
         public async Task<ActionResult> asignarRol(RolDTO rolDTO) { 
             var usuario = await userManager.FindByEmailAsync(rolDTO.Email);
@@ -73,6 +98,11 @@ namespace AutoresAPI.Controllers {
             return NoContent();
         }
 
+        /// <summary>
+        /// Remueve un rol de un usuario para acceso a nuestra API. 
+        /// </summary>
+        /// <param name="rolDTO"></param>
+        /// <returns></returns>
         [HttpPost("removerRol")]
         public async Task<ActionResult> removerRol(RolDTO rolDTO) {
             var usuario = await userManager.FindByEmailAsync(rolDTO.Email);
@@ -81,9 +111,10 @@ namespace AutoresAPI.Controllers {
             return NoContent();
         }
 
-        private async Task<Autenticacion> construirToken(Usuario usuario) {
+        private async Task<Autenticacion> construirToken(Usuario usuario, string usuarioId) {
             var claims = new List<Claim>() {
-                new Claim("email", usuario.Email)
+                new Claim("email", usuario.Email),
+                new Claim("id", usuarioId)
             };
 
             var user = await userManager.FindByEmailAsync(usuario.Email);
@@ -98,36 +129,5 @@ namespace AutoresAPI.Controllers {
 
             return new Autenticacion() { Token = new JwtSecurityTokenHandler().WriteToken(securityToken), Expiracion = exp };
         }
-
-        #region Encriptacion - Ejemplos
-        
-        [HttpGet("encriptar")]
-        public ActionResult encriptacion() {
-            var txtPlano = "Fernando Santiago";
-            var txtCifrado = dataProtector.Protect(txtPlano);
-            var txtDesc = dataProtector.Unprotect(txtCifrado);
-
-            return Ok(new { 
-                txtPlano = txtPlano,
-                txtCifrado = txtCifrado,
-                txtDesc = txtDesc
-            });
-        }
-
-        [HttpGet("encriptarTiempo")]
-        public ActionResult encriptacionTiempo() {
-            var porTiempo = dataProtector.ToTimeLimitedDataProtector();
-
-            var txtPlano = "Fernando Santiago";
-            var txtCifrado = porTiempo.Protect(txtPlano, lifetime: TimeSpan.FromSeconds(5));
-            var txtDesc = porTiempo.Unprotect(txtCifrado);
-
-            return Ok(new { 
-                txtPlano = txtPlano,
-                txtCifrado = txtCifrado,
-                txtDesc = txtDesc
-            });
-        }
-        #endregion
     }
 }
