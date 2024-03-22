@@ -3,20 +3,20 @@ using AutoresAPI.DTOs;
 using AutoresAPI.Entities;
 
 namespace AutoresAPI.Utilidades {
-    public class AutoMapperProfiles : Profile
-    {
-        public AutoMapperProfiles()
-        {
+    public class AutoMapperProfiles : Profile {
+        public AutoMapperProfiles() {
             CreateMap<AutorCreacionDTO, Autor>();
             CreateMap<AutorDTO, AutorDTO>();
             CreateMap<Autor, AutorDTOLibros>().ForMember(a => a.Libros, opc => opc.MapFrom(MapAutorDTOLibros));
+
             CreateMap<LibroCreacionDTO, Libro>().ForMember(l => l.AutoresLibros, opc => opc.MapFrom(MapAutoresLibros));
             CreateMap<Libro, LibroDTO>();
             CreateMap<Libro, LibroDTOAutores>().ForMember(l => l.Autores, opc => opc.MapFrom(MapLibroDTOAutores));
+
             CreateMap<ComentarioCreacionDTO, Comentario>();
             CreateMap<Comentario, ComentarioDTO>();
+
             CreateMap<LlaveAPI, LlaveDTO>();
-         
         }
 
         private List<LibroDTO> MapAutorDTOLibros(Autor autor, AutorDTO autorDTO ) { 
@@ -51,8 +51,7 @@ namespace AutoresAPI.Utilidades {
 
             if(libro.AutoresLibros == null) { return result; }
 
-            foreach (var autorLibro in libro.AutoresLibros)
-            {
+            foreach (var autorLibro in libro.AutoresLibros) {
                 result.Add(new AutorDTO() { 
                     Id = autorLibro.AutorId,
                     Nombre = autorLibro.Autor.Nombre,

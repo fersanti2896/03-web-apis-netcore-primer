@@ -72,11 +72,43 @@ namespace AutoresAPI.Middlewares {
                 }
             }
 
+            var superaRestricciones = PeticionSuperaRestricciones(llaveDB, httpContext);
+
+            if(!superaRestricciones) { 
+                httpContext.Response.StatusCode = 403;
+                return;
+            }
+
             var peticion = new PeticionAPI() { LlaveId = llaveDB.Id, FechaPeticion = DateTime.UtcNow };
             context.Add(peticion);
             await context.SaveChangesAsync();
 
             await requestDelegate(httpContext);
+        }
+
+        private bool PeticionSuperaRestricciones(LlaveAPI llaveAPI, HttpContext context) {
+            var restricciones = llaveAPI.RestriccionesDominio.Any() || llaveAPI.RestriccionesIP.Any();
+
+            if (!restricciones) { return true; }
+
+            var peticionRestricciones = PeticionSuperaRestriccionesDominio(llaveAPI.RestriccionesDominio, context);
+
+            return peticionRestricciones;
+        }
+
+        private bool PeticionSuperaRestriccionesDominio(List<RestriccionDominio> restricciones, HttpContext context) {
+            if (restricciones is null | restricciones.Count == 0) { return false; }
+
+            var referer = context.Request.Headers["Referer"].ToString();
+
+            if(referer == string.Empty) { return false; }
+
+            Uri myUri = new Uri(referer);
+            string host = myUri.Host;
+
+            var superaRestricciones = restricciones.Any(x => x.Dominio == host);
+
+            return superaRestricciones;
         }
     }
 }

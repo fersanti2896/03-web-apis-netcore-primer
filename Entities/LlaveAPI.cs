@@ -8,6 +8,8 @@ namespace AutoresAPI.Entities {
         public bool Activa { get; set; }
         public string UsuarioId { get; set; }
         public IdentityUser Usuario { get; set; }
+        public List<RestriccionDominio> RestriccionesDominio { get; set; }
+        public List<RestriccionIP> RestriccionesIP { get; set; }
     }
 
     public enum TipoLlave { 
