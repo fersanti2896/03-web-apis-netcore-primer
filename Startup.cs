@@ -121,6 +121,7 @@ namespace AutoresAPI{
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors();
+            app.UseLimitarPeticiones();
             app.UseAuthorization();
 
             app.UseEndpoints(end => {

@@ -18,5 +18,6 @@ namespace AutoresAPI {
         public DbSet<Comentario> Comentarios { get; set; }
         public DbSet<AutorLibro> AutoresLibros { get; set; }
         public DbSet<LlaveAPI> LlavesAPI { get; set; }
+        public DbSet<PeticionAPI> PeticionesAPI { get; set; }
     }
 }

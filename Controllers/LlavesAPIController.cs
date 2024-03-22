@@ -20,7 +20,7 @@ namespace AutoresAPI.Controllers {
             ApplicationDbContext context,
             IMapper mapper,
             LlavesService llavesService
-        ): base(context, mapper) {
+        ) {
             this.context = context;
             this.mapper = mapper;
             this.llavesService = llavesService;
@@ -43,6 +43,7 @@ namespace AutoresAPI.Controllers {
         /// </summary>
         /// <param name="llaveCreacionDTO"></param>
         /// <returns></returns>
+        [HttpPost("crear")]
         public async Task<ActionResult> llaveCreate(LlaveCreacionDTO llaveCreacionDTO) {
             var usuarioId = obtenerUsuarioId();
 
@@ -62,7 +63,7 @@ namespace AutoresAPI.Controllers {
         /// </summary>
         /// <param name="llaveActualizarDTO"></param>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPut("actualizar")]
         public async Task<ActionResult> llaveUpdate(LlaveActualizarDTO llaveActualizarDTO) {
             var usuarioId = obtenerUsuarioId();
             var llaveDB = await context.LlavesAPI.FirstOrDefaultAsync(x => x.Id == llaveActualizarDTO.LlaveId);
