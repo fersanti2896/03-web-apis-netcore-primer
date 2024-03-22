@@ -41,7 +41,10 @@ namespace AutoresAPI.Middlewares {
             }
 
             var llave = llaveStringValues[0];
-            var llaveDB = await context.LlavesAPI.FirstOrDefaultAsync(x => x.Llave == llave);
+            var llaveDB = await context.LlavesAPI
+                                       .Include(x => x.RestriccionesDominio)
+                                       .Include(x => x.RestriccionesIP)
+                                       .FirstOrDefaultAsync(x => x.Llave == llave);
 
             if(llaveDB is null) {
                 httpContext.Response.StatusCode = 400;
@@ -73,8 +76,8 @@ namespace AutoresAPI.Middlewares {
             }
 
             var superaRestricciones = PeticionSuperaRestricciones(llaveDB, httpContext);
-
-            if(!superaRestricciones) { 
+            
+            if (!superaRestricciones) { 
                 httpContext.Response.StatusCode = 403;
                 return;
             }
@@ -86,14 +89,26 @@ namespace AutoresAPI.Middlewares {
             await requestDelegate(httpContext);
         }
 
+        private bool PeticionSuperaRestriccionesIP(List<RestriccionIP> restricciones, HttpContext context) { 
+            if (restricciones is null | restricciones.Count == 0) { return false; }
+
+            var ip = context.Connection.RemoteIpAddress.ToString();
+            if(ip == string.Empty) { return false; }
+
+            var superaRestricciones = restricciones.Any(x => x.IP == ip);
+
+            return superaRestricciones;
+        }
+
         private bool PeticionSuperaRestricciones(LlaveAPI llaveAPI, HttpContext context) {
             var restricciones = llaveAPI.RestriccionesDominio.Any() || llaveAPI.RestriccionesIP.Any();
 
             if (!restricciones) { return true; }
 
             var peticionRestricciones = PeticionSuperaRestriccionesDominio(llaveAPI.RestriccionesDominio, context);
+            var superaRestriccionesIP = PeticionSuperaRestriccionesIP(llaveAPI.RestriccionesIP, context);
 
-            return peticionRestricciones;
+            return peticionRestricciones || superaRestriccionesIP;
         }
 
         private bool PeticionSuperaRestriccionesDominio(List<RestriccionDominio> restricciones, HttpContext context) {
