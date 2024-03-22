@@ -35,6 +35,7 @@ namespace AutoresAPI.Controllers {
             var usuarioId = obtenerUsuarioId();
             var llaves = await context.LlavesAPI
                                       .Include(x => x.RestriccionesDominio)
+                                      .Include(x => x.RestriccionesIP)
                                       .Where(x => x.UsuarioId == usuarioId).ToListAsync();
 
             return mapper.Map<List<LlaveDTO>>(llaves);

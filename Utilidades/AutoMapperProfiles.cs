@@ -19,6 +19,7 @@ namespace AutoresAPI.Utilidades {
             CreateMap<LlaveAPI, LlaveDTO>();
 
             CreateMap<RestriccionDominio, RestriccionDominioDTO>();
+            CreateMap<RestriccionIP, RestriccionesIPDTO>();
         }
 
         private List<LibroDTO> MapAutorDTOLibros(Autor autor, AutorDTO autorDTO ) { 
