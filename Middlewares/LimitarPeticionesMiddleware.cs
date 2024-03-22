@@ -16,6 +16,14 @@ namespace AutoresAPI.Middlewares {
             var limitePeticiones = new LimitesPeticionesDTO();
             configuration.GetRequiredSection("limitePeticiones").Bind(limitePeticiones);
 
+            var ruta = httpContext.Request.Path.ToString();
+            var rutaBlanca = limitePeticiones.ListaBlancaRutas.Any(x => ruta.Contains(x));
+
+            if (rutaBlanca) { 
+                await requestDelegate(httpContext);
+                return;
+            }
+
             var llaveStringValues = httpContext.Request.Headers["X-Api-Key"];
 
             if(llaveStringValues.Count == 0) { 
@@ -57,7 +65,8 @@ namespace AutoresAPI.Middlewares {
 
                 if (conteoPeticiones >= limitePeticiones.PeticionesGratuitas) {
                     httpContext.Response.StatusCode = 429;
-                    await httpContext.Response.WriteAsync("Ha excedido el límite de peticiones por día. Si desea realizar mas peticiones, actualice su cuenta a profesional.");
+                    await httpContext.Response
+                                     .WriteAsync("Ha excedido el límite de peticiones por día. Si desea realizar mas peticiones, actualice su cuenta a profesional.");
 
                     return;
                 }
