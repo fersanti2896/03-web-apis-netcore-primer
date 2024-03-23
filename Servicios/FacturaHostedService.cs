@@ -24,16 +24,25 @@ namespace AutoresAPI.Servicios {
         private void ProcesarFacturas(object state) {
             using (var scoped = serviceProvider.CreateScope()) {
                 var context = scoped.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var today = DateTime.Today;
-                var dateCompare = today.AddMonths(-1);
-                var facturaEmitida = context.FacturasEmitidas.Any(x => x.Anio == dateCompare.Year && x.Mes == dateCompare.Month);
+                ActualizaEstadoCuenta(context);
+                EmitirFacturas(context);
+            }
+        }
 
-                if (!facturaEmitida) {
-                    var fechaInicio = new DateTime(dateCompare.Year, dateCompare.Month, 1);
-                    var fechaFin = fechaInicio.AddMonths(1);
+        private static void ActualizaEstadoCuenta(ApplicationDbContext context) { 
+            context.Database.ExecuteSqlInterpolated($"EXEC ActualizaEstadoCuentaUsuario");
+        }
 
-                    context.Database.ExecuteSqlInterpolated($"EXEC CreacionFacturas {fechaInicio.ToString("yyyy-MM-dd")}, {fechaFin.ToString("yyyy-MM-dd")}");
-                }
+        private static void EmitirFacturas(ApplicationDbContext context) {
+            var today = DateTime.Today;
+            var dateCompare = today.AddMonths(-1);
+            var facturaEmitida = context.FacturasEmitidas.Any(x => x.Anio == dateCompare.Year && x.Mes == dateCompare.Month);
+
+            if (!facturaEmitida) {
+                var fechaInicio = new DateTime(dateCompare.Year, dateCompare.Month, 1);
+                var fechaFin = fechaInicio.AddMonths(1);
+
+                context.Database.ExecuteSqlInterpolated($"EXEC CreacionFacturas {fechaInicio.ToString("yyyy-MM-dd")}, {fechaFin.ToString("yyyy-MM-dd")}");
             }
         }
     }
