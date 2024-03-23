@@ -14,15 +14,15 @@ namespace AutoresAPI.Controllers {
     [ApiController]
     [Route("api/usuarios")]
     public class UsuariosController : ControllerBase {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<Usuario> userManager;
         private readonly IConfiguration configuration;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly SignInManager<Usuario> signInManager;
         private readonly LlavesService serviceLlaves;
 
         public UsuariosController(
-            UserManager<IdentityUser> userManager,
+            UserManager<Usuario> userManager,
             IConfiguration configuration,
-            SignInManager<IdentityUser> signInManager,
+            SignInManager<Usuario> signInManager,
             LlavesService serviceLlaves
         ) {
             this.userManager = userManager;
@@ -37,8 +37,8 @@ namespace AutoresAPI.Controllers {
         /// <param name="usuario"></param>
         /// <returns></returns>
         [HttpPost("registrar")]
-        public async Task<ActionResult<Autenticacion>> registrar(Usuario usuario) {
-            var user = new IdentityUser { UserName = usuario.Email, Email = usuario.Email };
+        public async Task<ActionResult<Autenticacion>> registrar(UsuarioDTO usuario) {
+            var user = new Usuario { UserName = usuario.Email, Email = usuario.Email };
             var result = await userManager.CreateAsync(user, usuario.Password);
 
             if (result.Succeeded) {
@@ -56,7 +56,7 @@ namespace AutoresAPI.Controllers {
         /// <param name="usuario"></param>
         /// <returns></returns>
         [HttpPost("login")]
-        public async Task<ActionResult<Autenticacion>> login(Usuario usuario) {
+        public async Task<ActionResult<Autenticacion>> login(UsuarioDTO usuario) {
             var result = await signInManager.PasswordSignInAsync(usuario.Email, usuario.Password, isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded) {
@@ -80,7 +80,7 @@ namespace AutoresAPI.Controllers {
             var idClaim = HttpContext.User.Claims.Where(c => c.Type == "id").FirstOrDefault();
             var usuarioId = idClaim.Value;
 
-            var usuario = new Usuario { Email = email };
+            var usuario = new UsuarioDTO { Email = email };
 
             return await construirToken(usuario, usuarioId);
         }
@@ -111,7 +111,7 @@ namespace AutoresAPI.Controllers {
             return NoContent();
         }
 
-        private async Task<Autenticacion> construirToken(Usuario usuario, string usuarioId) {
+        private async Task<Autenticacion> construirToken(UsuarioDTO usuario, string usuarioId) {
             var claims = new List<Claim>() {
                 new Claim("email", usuario.Email),
                 new Claim("id", usuarioId)

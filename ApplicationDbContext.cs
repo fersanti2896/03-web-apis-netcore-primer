@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoresAPI {
-    public class ApplicationDbContext : IdentityDbContext {
+    public class ApplicationDbContext : IdentityDbContext<Usuario> {
         public ApplicationDbContext(DbContextOptions options) : base(options) {
         }
 
@@ -11,6 +11,7 @@ namespace AutoresAPI {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<AutorLibro>().HasKey(al => new { al.AutorId, al.LibroId });
+            modelBuilder.Entity<Factura>().Property(f => f.Monto).HasColumnType("decimal(18,2)");
         }
 
         public DbSet<Autor> Autores { get; set; }
@@ -21,5 +22,7 @@ namespace AutoresAPI {
         public DbSet<PeticionAPI> PeticionesAPI { get; set; }
         public DbSet<RestriccionDominio> RestriccionesDominio { get; set; }
         public DbSet<RestriccionIP> RestriccionesIP { get; set; }
+        public DbSet<Factura> Facturas { get; set; }
+        public DbSet<FacturaEmitida> FacturasEmitidas { get; set; }
     }
 }

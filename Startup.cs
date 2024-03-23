@@ -1,4 +1,5 @@
-﻿using AutoresAPI.Filtros;
+﻿using AutoresAPI.Entities;
+using AutoresAPI.Filtros;
 using AutoresAPI.Middlewares;
 using AutoresAPI.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -83,7 +84,7 @@ namespace AutoresAPI{
             services.AddAutoMapper(typeof(Startup));
 
             // Configurando Identity
-            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+            services.AddIdentity<Usuario, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
             // Autorizacion por Claims
             services.AddAuthorization(opc => {

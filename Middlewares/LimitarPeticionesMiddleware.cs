@@ -44,6 +44,7 @@ namespace AutoresAPI.Middlewares {
             var llaveDB = await context.LlavesAPI
                                        .Include(x => x.RestriccionesDominio)
                                        .Include(x => x.RestriccionesIP)
+                                       .Include(x => x.Usuario)
                                        .FirstOrDefaultAsync(x => x.Llave == llave);
 
             if(llaveDB is null) {
@@ -73,6 +74,11 @@ namespace AutoresAPI.Middlewares {
 
                     return;
                 }
+            } else if(llaveDB.Usuario.EstadoCuenta) {
+                httpContext.Response.StatusCode = 400;
+                await httpContext.Response.WriteAsync("Su Estado de Cuenta no ha sido pagado.");
+
+                return;
             }
 
             var superaRestricciones = PeticionSuperaRestricciones(llaveDB, httpContext);

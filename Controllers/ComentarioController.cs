@@ -13,12 +13,12 @@ namespace AutoresAPI.Controllers {
     public class ComentarioController : ControllerBase {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<Usuario> userManager;
 
         public ComentarioController(
             ApplicationDbContext context,
             IMapper mapper,
-            UserManager<IdentityUser> userManager
+            UserManager<Usuario> userManager
         ) {
             this.context = context;
             this.mapper = mapper;

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace AutoresAPI.DTOs {
-    public class Usuario {
+    public class UsuarioDTO {
         [Required]
         [EmailAddress]
         public string Email { get; set; }
