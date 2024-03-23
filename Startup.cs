@@ -101,6 +101,9 @@ namespace AutoresAPI{
             });
 
             services.AddScoped<LlavesService>();
+
+            // Genera las facturas
+            services.AddHostedService<FacturaHostedService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger) {
